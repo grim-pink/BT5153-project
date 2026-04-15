@@ -35,7 +35,7 @@ dvc init
 Expected files:
 - `spam.csv`
 - `dataset.csv`
-- `validation_intent.xlsx` (optional, for Task 2 evaluation)
+- `validation_intent.xlsx` 
 
 ### 4. Build processed dataset
 
