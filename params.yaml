@@ -1,0 +1,20 @@
+data:
+  test_size: 0.2
+  random_state: 42
+
+baseline:
+  experiment_name: Spam_Classification_Baseline
+  max_features: 5000
+  max_iter: 1000
+
+distilbert:
+  experiment_name: Spam_Classification_DistilBERT
+  model_name: distilbert-base-uncased
+  max_length: 64
+  learning_rate: 2e-5
+  train_batch_size: 32
+  eval_batch_size: 32
+  num_train_epochs: 2
+  weight_decay: 0.01
+intent:
+  ollama_model: qwen2.5:7b

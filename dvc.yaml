@@ -1,0 +1,66 @@
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py
+      --spam_csv data/raw/spam.csv
+      --dataset_csv data/raw/dataset.csv
+      --output_path data/processed/cleaned_spam.csv
+    deps:
+      - src/data/make_dataset.py
+      - src/preprocessing/clean_text.py
+      - data/raw/spam.csv
+      - data/raw/dataset.csv
+    outs:
+      - data/processed/cleaned_spam.csv
+
+  split_dataset:
+    cmd: python src/data/split_dataset.py
+      --input_path data/processed/cleaned_spam.csv
+      --train_output data/processed/train.csv
+      --test_output data/processed/test.csv
+      --test_size 0.2
+      --random_state 42
+    deps:
+      - src/data/split_dataset.py
+      - data/processed/cleaned_spam.csv
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train_baseline:
+    cmd: python src/training/train_baseline.py
+      --train_path data/processed/train.csv
+      --test_path data/processed/test.csv
+      --model_output artifacts/baseline/model.joblib
+      --metrics_output artifacts/metrics/baseline_metrics.json
+      --experiment_name Spam_Classification_Baseline
+    deps:
+      - src/training/train_baseline.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - artifacts/baseline/model.joblib
+    metrics:
+      - artifacts/metrics/baseline_metrics.json
+
+  train_distilbert:
+    cmd: python src/training/train_distilbert.py
+      --train_path data/processed/train.csv
+      --test_path data/processed/test.csv
+      --model_output_dir artifacts/distilbert_spam_model
+      --metrics_output artifacts/metrics/distilbert_metrics.json
+      --experiment_name Spam_Classification_DistilBERT
+      --model_name distilbert-base-uncased
+      --max_length 64
+      --learning_rate 2e-5
+      --train_batch_size 32
+      --eval_batch_size 32
+      --num_train_epochs 2
+      --weight_decay 0.01
+    deps:
+      - src/training/train_distilbert.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - artifacts/distilbert_spam_model
+    metrics:
+      - artifacts/metrics/distilbert_metrics.json

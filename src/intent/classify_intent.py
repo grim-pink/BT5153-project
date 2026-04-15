@@ -1,0 +1,53 @@
+from __future__ import annotations
+
+import os
+
+from langchain_ollama import ChatOllama
+
+from src.intent.prompts import FEW_SHOT_EXAMPLES, LABELS, SYSTEM_PROMPT
+
+_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
+_OLLAMA_TEMPERATURE = float(os.getenv("OLLAMA_TEMPERATURE", "0.0"))
+
+_LLM = None
+
+
+def get_llm():
+    global _LLM
+    if _LLM is None:
+        _LLM = ChatOllama(
+            model=_OLLAMA_MODEL,
+            temperature=_OLLAMA_TEMPERATURE,
+        )
+    return _LLM
+
+
+def _build_messages(text: str):
+    messages = [("system", SYSTEM_PROMPT)]
+
+    for example_text, example_label in FEW_SHOT_EXAMPLES:
+        messages.append(("human", f"Text: {example_text}"))
+        messages.append(("assistant", example_label))
+
+    messages.append(("human", f"Text: {text}"))
+    return messages
+
+
+def _normalize_label(response_text: str) -> str:
+    cleaned = response_text.strip()
+
+    if cleaned in LABELS:
+        return cleaned
+
+    for label in LABELS:
+        if label.lower() in cleaned.lower():
+            return label
+
+    return "Benign"
+
+
+def classify_intent(text: str) -> str:
+    llm = get_llm()
+    messages = _build_messages(text)
+    response = llm.invoke(messages).content
+    return _normalize_label(response)

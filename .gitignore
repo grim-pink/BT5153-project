@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Training artifacts / logs
+mlruns/
+mlflow.db
+artifacts/
+data/processed/
+distilbert_results/
+checkpoints/
+
+# Raw data if you do not want in Git
+data/raw/
+
+# DVC
+dvc_storage/
+
+# OS
+.DS_Store

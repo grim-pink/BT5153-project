@@ -1,0 +1,55 @@
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+
+def split_dataset(
+    input_path: str,
+    train_output: str,
+    test_output: str,
+    test_size: float = 0.2,
+    random_state: int = 42,
+) -> None:
+    df = pd.read_csv(input_path)
+
+    df["label_num"] = (df["label"] == "spam").astype(int)
+
+    train_df, test_df = train_test_split(
+        df,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=df["label_num"],
+    )
+
+    train_out = Path(train_output)
+    test_out = Path(test_output)
+    train_out.parent.mkdir(parents=True, exist_ok=True)
+    test_out.parent.mkdir(parents=True, exist_ok=True)
+
+    train_df.to_csv(train_out, index=False)
+    test_df.to_csv(test_out, index=False)
+
+    print(f"Train saved to {train_out} with {len(train_df)} rows")
+    print(f"Test saved to {test_out} with {len(test_df)} rows")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_path", required=True)
+    parser.add_argument("--train_output", required=True)
+    parser.add_argument("--test_output", required=True)
+    parser.add_argument("--test_size", type=float, default=0.2)
+    parser.add_argument("--random_state", type=int, default=42)
+    args = parser.parse_args()
+
+    split_dataset(
+        input_path=args.input_path,
+        train_output=args.train_output,
+        test_output=args.test_output,
+        test_size=args.test_size,
+        random_state=args.random_state,
+    )
