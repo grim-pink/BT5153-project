@@ -6,6 +6,9 @@ from fastapi import FastAPI, HTTPException
 from prometheus_client import Counter
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from src.inference.load_spam_model import (
     get_device,
@@ -22,6 +25,11 @@ app = FastAPI(
     description="Two-stage SMS inference: Task 1 spam detection, Task 2 intent classification",
     version="1.0.0",
 )
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 Instrumentator().instrument(app).expose(app)
 
@@ -53,7 +61,10 @@ async def startup_event() -> None:
         print(f"Startup failed: {e}")
         raise
 
-
+@app.get("/")
+async def serve_ui():
+    return FileResponse(STATIC_DIR / "index.html")
+    
 @app.get("/health")
 async def health() -> dict:
     model_loaded = get_model() is not None
