@@ -41,28 +41,28 @@ Expected files:
 
 ```bash
 python -m src.data.make_dataset \
-  --spam-csv data/raw/spam.csv \
-  --extra-csv data/raw/dataset.csv \
-  --output data/processed/cleaned_spam.csv
+  --spam_csv data/raw/spam.csv \
+  --dataset_csv data/raw/dataset.csv \
+  --output_path data/processed/cleaned_spam.csv
 ```
 
 ### 5. Split train/test
 
 ```bash
 python -m src.data.split_dataset \
-  --input data/processed/cleaned_spam.csv \
-  --train-output data/processed/train.csv \
-  --test-output data/processed/test.csv
+  --input_path data/processed/cleaned_spam.csv \
+  --train_output data/processed/train.csv \
+  --test_output data/processed/test.csv
 ```
 
 ### 6. Train DistilBERT
 
 ```bash
 python -m src.training.train_distilbert \
-  --train-path data/processed/train.csv \
-  --test-path data/processed/test.csv \
-  --model-output artifacts/distilbert_spam_model \
-  --metrics-output artifacts/metrics/distilbert_metrics.json
+  --train_path data/processed/train.csv \
+  --test_path data/processed/test.csv \
+  --model_output_dir artifacts/distilbert_spam_model \
+  --metrics_output artifacts/metrics/distilbert_metrics.json
 ```
 
 ### 7. Run API
