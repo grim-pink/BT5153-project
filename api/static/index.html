@@ -1,172 +1,310 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SMS Scam Detector</title>
+  <title>Spam + Social Intent Classifier</title>
   <style>
+    :root {
+      --blue: #1f3c88;
+      --blue-dark: #17306d;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --spam-bg: #fee2e2;
+      --spam-text: #991b1b;
+      --ham-bg: #dcfce7;
+      --ham-text: #166534;
+      --intent-bg: #ede9fe;
+      --intent-text: #5b21b6;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       font-family: Arial, sans-serif;
-      background: #f4f7fb;
+      background: linear-gradient(135deg, #eef3ff, #f8fafc);
       margin: 0;
-      padding: 0;
+      color: var(--text);
     }
+
     .container {
-      max-width: 900px;
-      margin: 36px auto;
-      background: white;
-      border-radius: 16px;
+      max-width: 1120px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+
+    .hero {
+      background: var(--card);
+      border-radius: 20px;
       padding: 28px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
     }
+
     h1 {
-      color: #1f3c88;
+      color: var(--blue);
+      margin: 0 0 10px;
+      font-size: 32px;
+    }
+
+    h2 {
+      color: var(--blue);
       margin-top: 0;
     }
-    h2 {
-      margin-top: 32px;
-      color: #1f3c88;
+
+    p { color: var(--muted); }
+
+    .subtext {
+      margin-bottom: 0;
+      line-height: 1.5;
     }
-    p {
-      color: #555;
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: stretch;
     }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
     textarea {
       width: 100%;
-      min-height: 130px;
+      min-height: 150px;
       padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
       font-size: 15px;
       resize: vertical;
-      box-sizing: border-box;
     }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(31, 60, 136, 0.12);
+    }
+
     button {
-      margin-top: 16px;
-      background: #1f3c88;
+      margin-top: 14px;
+      background: var(--blue);
       color: white;
       border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
+      padding: 12px 18px;
+      border-radius: 12px;
       font-size: 15px;
       cursor: pointer;
-      margin-right: 10px;
+      margin-right: 8px;
     }
-    button:hover {
-      background: #17306d;
+
+    button:hover { background: var(--blue-dark); }
+
+    .secondary-btn {
+      background: #eef3ff;
+      color: var(--blue);
+      border: 1px solid #c7d2fe;
     }
+
+    .secondary-btn:hover { background: #dbeafe; }
+
+    .example-row { margin-top: 12px; }
+
+    .result-placeholder {
+      height: 100%;
+      min-height: 300px;
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+    }
+
     .result, .batch-result {
-      margin-top: 24px;
-      padding: 18px;
-      border-radius: 12px;
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
       display: none;
     }
+
     .row {
-      margin: 8px 0;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
     }
+
+    .row:last-child { border-bottom: none; }
+
     .label {
+      display: block;
+      font-size: 13px;
       font-weight: bold;
-      color: #333;
+      color: var(--muted);
+      margin-bottom: 4px;
     }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
     .spam {
-      color: #b91c1c;
-      font-weight: bold;
+      background: var(--spam-bg);
+      color: var(--spam-text);
     }
+
     .ham {
-      color: #15803d;
-      font-weight: bold;
+      background: var(--ham-bg);
+      color: var(--ham-text);
     }
+
     .intent {
-      color: #7c3aed;
-      font-weight: bold;
+      background: var(--intent-bg);
+      color: var(--intent-text);
     }
+
     .loading, .error {
       margin-top: 14px;
       display: none;
     }
-    .error {
-      color: #b91c1c;
-    }
+
+    .error { color: var(--spam-text); font-weight: bold; }
+
+    .batch-section { margin-top: 24px; }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
       font-size: 14px;
+      overflow: hidden;
+      border-radius: 12px;
     }
+
     th, td {
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       padding: 10px;
       text-align: left;
       vertical-align: top;
     }
-    th {
-      background: #eef3ff;
-    }
+
+    th { background: #eef3ff; color: var(--blue); }
+
     .hint {
-      color: #777;
+      color: var(--muted);
       font-size: 13px;
       margin-top: 8px;
+    }
+
+    @media (max-width: 850px) {
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>SMS Scam Detector</h1>
-    <p>Analyze a single SMS or test multiple messages in batch.</p>
+    <section class="hero">
+      <h1>Spam + Social Intent Classifier</h1>
+      <p class="subtext">Analyze SMS messages using a two-stage pipeline: spam/ham prediction followed by social intent classification.</p>
+    </section>
 
-    <h2>Single Message Test</h2>
-    <textarea id="textInput" placeholder="Example: Your account has been suspended. Verify your identity now."></textarea>
-    <button onclick="analyzeText()">Analyze Message</button>
+    <section class="grid">
+      <div class="card">
+        <h2>Single Message Test</h2>
+        <textarea id="textInput" placeholder="Example: Your account has been suspended. Verify your identity now."></textarea>
+        <button onclick="analyzeText()">Analyze Message</button>
 
-    <div class="loading" id="loading">Analyzing...</div>
-    <div class="error" id="error"></div>
+        <div class="example-row">
+          <button class="secondary-btn" onclick="setExample('Congratulations! You won a free prize. Claim now!')">Spam Example</button>
+          <button class="secondary-btn" onclick="setExample('Hey, are we still meeting for lunch tomorrow?')">Ham Example</button>
+          <button class="secondary-btn" onclick="setExample('Urgent: Your bank account has been locked. Verify immediately.')">Urgent Scam</button>
+        </div>
 
-    <div class="result" id="resultCard">
-      <div class="row"><span class="label">Original Text:</span> <span id="originalText"></span></div>
-      <div class="row"><span class="label">Cleaned Text:</span> <span id="cleanedText"></span></div>
-      <div class="row"><span class="label">Spam/Ham Classification:</span> <span id="prediction"></span></div>
-      <div class="row"><span class="label">Confidence:</span> <span id="confidence"></span></div>
-      <div class="row"><span class="label">Social Intent Classification:</span> <span id="intent"></span></div>
-      <div class="row"><span class="label">Intent Error:</span> <span id="intentError"></span></div>
-      <div class="row"><span class="label">Probabilities:</span> <span id="probabilities"></span></div>
-      <div class="row"><span class="label">Model Version:</span> <span id="modelVersion"></span></div>
-    </div>
+        <div class="loading" id="loading">Analyzing...</div>
+        <div class="error" id="error"></div>
+      </div>
 
-    <h2>Batch Test</h2>
-    <textarea id="batchInput" placeholder="Enter one message per line"></textarea>
-    <div class="hint">One message per line. Empty lines are ignored.</div>
-    <button onclick="analyzeBatch()">Analyze Batch</button>
+      <div class="card">
+        <h2>Prediction Result</h2>
+        <div class="result-placeholder" id="placeholder">
+          Enter a message and click Analyze Message to view the prediction here.
+        </div>
 
-    <div class="loading" id="batchLoading">Analyzing batch...</div>
-    <div class="error" id="batchError"></div>
+        <div class="result" id="resultCard">
+          <div class="row"><span class="label">Original Text</span><span id="originalText"></span></div>
+          <div class="row"><span class="label">Cleaned Text</span><span id="cleanedText"></span></div>
+          <div class="row"><span class="label">Spam/Ham Classification</span><span id="prediction" class="badge"></span></div>
+          <div class="row"><span class="label">Confidence</span><span id="confidence"></span></div>
+          <div class="row"><span class="label">Social Intent</span><span id="intent" class="badge intent"></span></div>
+          <div class="row"><span class="label">Intent Error</span><span id="intentError"></span></div>
+          <div class="row"><span class="label">Probabilities</span><span id="probabilities"></span></div>
+          <div class="row"><span class="label">Model Version</span><span id="modelVersion"></span></div>
+        </div>
+      </div>
+    </section>
 
-    <div class="batch-result" id="batchResultCard">
-      <div class="row"><span class="label">Batch Size:</span> <span id="batchSize"></span></div>
-      <table id="batchTable">
-        <thead>
-          <tr>
-            <th>Text</th>
-            <th>Spam/Ham Classification</th>
-            <th>Confidence</th>
-            <th>Social Intent Classification</th>
-            <th>Intent Error</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <section class="card batch-section">
+      <h2>Batch Test</h2>
+      <textarea id="batchInput" placeholder="Enter one message per line"></textarea>
+      <div class="hint">One message per line. Empty lines are ignored.</div>
+      <button onclick="analyzeBatch()">Analyze Batch</button>
+
+      <div class="loading" id="batchLoading">Analyzing batch...</div>
+      <div class="error" id="batchError"></div>
+
+      <div class="batch-result" id="batchResultCard">
+        <div class="row"><span class="label">Batch Size</span><span id="batchSize"></span></div>
+        <table id="batchTable">
+          <thead>
+            <tr>
+              <th>Text</th>
+              <th>Spam/Ham</th>
+              <th>Confidence</th>
+              <th>Social Intent</th>
+              <th>Intent Error</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <script>
+    function setExample(text) {
+      document.getElementById("textInput").value = text;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
     async function analyzeText() {
       const text = document.getElementById("textInput").value.trim();
       const loading = document.getElementById("loading");
       const error = document.getElementById("error");
       const resultCard = document.getElementById("resultCard");
+      const placeholder = document.getElementById("placeholder");
 
       error.style.display = "none";
       resultCard.style.display = "none";
+      placeholder.style.display = "flex";
 
       if (!text) {
         error.innerText = "Please enter a message.";
@@ -192,21 +330,22 @@
           return;
         }
 
-        document.getElementById("originalText").innerText = data.text;
+        document.getElementById("originalText").innerText = data.text ?? text;
         document.getElementById("cleanedText").innerText = data.cleaned_text || "-";
 
+        const prediction = (data.prediction || "-").toLowerCase();
         const predEl = document.getElementById("prediction");
-        predEl.innerText = data.prediction;
-        predEl.className = data.prediction === "spam" ? "spam" : "ham";
+        predEl.innerText = prediction;
+        predEl.className = `badge ${prediction === "spam" ? "spam" : "ham"}`;
 
         document.getElementById("confidence").innerText = data.confidence ?? "-";
         document.getElementById("intent").innerText = data.intent ?? "None";
-        document.getElementById("intent").className = "intent";
         document.getElementById("intentError").innerText = data.intent_error ?? "None";
         document.getElementById("probabilities").innerText =
           data.probabilities ? `ham=${data.probabilities.ham}, spam=${data.probabilities.spam}` : "-";
         document.getElementById("modelVersion").innerText = data.model_version ?? "-";
 
+        placeholder.style.display = "none";
         resultCard.style.display = "block";
       } catch (e) {
         loading.style.display = "none";
@@ -255,13 +394,14 @@
         document.getElementById("batchSize").innerText = data.batch_size ?? texts.length;
 
         data.results.forEach(item => {
+          const prediction = (item.prediction || "-").toLowerCase();
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${item.text}</td>
-            <td class="${item.prediction === "spam" ? "spam" : "ham"}">${item.prediction}</td>
-            <td>${item.confidence ?? "-"}</td>
-            <td class="intent">${item.intent ?? "None"}</td>
-            <td>${item.intent_error ?? "None"}</td>
+            <td>${escapeHtml(item.text ?? "")}</td>
+            <td><span class="badge ${prediction === "spam" ? "spam" : "ham"}">${escapeHtml(prediction)}</span></td>
+            <td>${escapeHtml(item.confidence ?? "-")}</td>
+            <td><span class="badge intent">${escapeHtml(item.intent ?? "None")}</span></td>
+            <td>${escapeHtml(item.intent_error ?? "None")}</td>
           `;
           tbody.appendChild(tr);
         });
