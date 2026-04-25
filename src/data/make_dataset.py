@@ -8,34 +8,40 @@ import pandas as pd
 from src.preprocessing.clean_text import light_clean_text
 
 
-def build_combined_text(df: pd.DataFrame) -> pd.Series:
-    parts = [
-        df["v2"] if "v2" in df.columns else pd.Series([""] * len(df)),
-        df["Unnamed: 2"] if "Unnamed: 2" in df.columns else pd.Series([""] * len(df)),
-        df["Unnamed: 3"] if "Unnamed: 3" in df.columns else pd.Series([""] * len(df)),
-        df["Unnamed: 4"] if "Unnamed: 4" in df.columns else pd.Series([""] * len(df)),
-        df["text_type"] if "text_type" in df.columns else pd.Series([""] * len(df)),
-        df["text"] if "text" in df.columns else pd.Series([""] * len(df)),
-    ]
-    combined = parts[0].fillna("").astype(str)
-    for p in parts[1:]:
-        combined = combined + " " + p.fillna("").astype(str)
-    return combined
+def load_spam_csv(path: str) -> pd.DataFrame:
+    df = pd.read_csv(path, encoding="latin1")
+
+    extra_cols = ["Unnamed: 2", "Unnamed: 3", "Unnamed: 4"]
+    for col in extra_cols:
+        if col not in df.columns:
+            df[col] = ""
+
+    df["text"] = (
+        df["v2"].fillna("").astype(str) + " " +
+        df["Unnamed: 2"].fillna("").astype(str) + " " +
+        df["Unnamed: 3"].fillna("").astype(str) + " " +
+        df["Unnamed: 4"].fillna("").astype(str)
+    )
+
+    df = df.rename(columns={"v1": "label"})
+    return df[["label", "text"]]
+
+
+def load_dataset_csv(path: str) -> pd.DataFrame:
+    df = pd.read_csv(path, encoding="latin1")
+    df = df.rename(columns={"text_type": "label", "text": "text"})
+    return df[["label", "text"]]
 
 
 def make_dataset(spam_csv: str, dataset_csv: str, output_path: str) -> None:
-    df1 = pd.read_csv(spam_csv, encoding="latin1")
-    df2 = pd.read_csv(dataset_csv, encoding="latin1")
+    df1 = load_spam_csv(spam_csv)
+    df2 = load_dataset_csv(dataset_csv)
 
     df = pd.concat([df1, df2], ignore_index=True)
-    df["v2"] = build_combined_text(df)
 
-    drop_cols = [c for c in ["Unnamed: 2", "Unnamed: 3", "Unnamed: 4", "text_type", "text"] if c in df.columns]
-    if drop_cols:
-        df = df.drop(columns=drop_cols)
-
-    df = df.rename(columns={"v1": "label", "v2": "text"})
+    df["text"] = df["text"].fillna("").astype(str)
     df["cleaned_text"] = df["text"].apply(light_clean_text)
+
     df = df.drop_duplicates(subset=["label", "cleaned_text"]).reset_index(drop=True)
 
     output = Path(output_path)
@@ -44,6 +50,7 @@ def make_dataset(spam_csv: str, dataset_csv: str, output_path: str) -> None:
 
     print(f"Saved cleaned dataset to {output}")
     print(f"Rows: {len(df)}")
+    print(df["label"].value_counts())
 
 
 if __name__ == "__main__":
