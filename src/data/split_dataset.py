@@ -16,8 +16,28 @@ def split_dataset(
 ) -> None:
     df = pd.read_csv(input_path)
 
+    # ── 1. Validate required columns ─────────────────────────────
+    required_cols = {"label", "text", "cleaned_text"}
+    missing = required_cols - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+
+    # ── 2. Normalize labels ──────────────────────────────────────
+    df["label"] = (
+        df["label"]
+        .fillna("")
+        .astype(str)
+        .str.lower()
+        .str.strip()
+    )
+
+    # Keep only valid labels
+    df = df[df["label"].isin(["ham", "spam"])].copy()
+
+    # ── 3. Create numeric label ──────────────────────────────────
     df["label_num"] = (df["label"] == "spam").astype(int)
 
+    # ── 4. Train-test split (stratified) ─────────────────────────
     train_df, test_df = train_test_split(
         df,
         test_size=test_size,
@@ -25,6 +45,7 @@ def split_dataset(
         stratify=df["label_num"],
     )
 
+    # ── 5. Save outputs ──────────────────────────────────────────
     train_out = Path(train_output)
     test_out = Path(test_output)
     train_out.parent.mkdir(parents=True, exist_ok=True)
@@ -33,8 +54,15 @@ def split_dataset(
     train_df.to_csv(train_out, index=False)
     test_df.to_csv(test_out, index=False)
 
+    # ── 6. Debug prints (VERY useful) ────────────────────────────
     print(f"Train saved to {train_out} with {len(train_df)} rows")
     print(f"Test saved to {test_out} with {len(test_df)} rows")
+
+    print("\nTrain label distribution:")
+    print(train_df["label"].value_counts(normalize=True))
+
+    print("\nTest label distribution:")
+    print(test_df["label"].value_counts(normalize=True))
 
 
 if __name__ == "__main__":
