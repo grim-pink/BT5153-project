@@ -1,6 +1,6 @@
 # 🚀 Spam + Social Intent Detection System (Group 15)
 
-A production-style, end-to-end machine learning pipeline for SMS analysis, combining deep learning classification with LLM-powered intent understanding.
+A production-inspired, end-to-end machine learning pipeline for SMS analysis, combining deep learning classification with LLM-powered intent understanding.
 
 # 🔥 What This Project Does
 
@@ -14,12 +14,13 @@ We built a two-stage intelligent detection system:
 
 💬 Task 2 — Social Intent Classification (LLM)
 - Triggered only if message is spam
-- Uses an external Ollama-hosted LLM
+- Uses a locally hosted LLM via Ollama
+- Uses prompting (zero-shot / few-shot)
 - Extracts intent such as:
-  - Promotion
- - Scam / Phishing
- - Urgency / Threat
- - Financial bait
+  - Financial / Reward Deception
+  - Impersonation / Credential Theft
+  - Adult / Solicitation
+  - Benign
 
 # 🏗️ System Architecture
 
@@ -52,7 +53,7 @@ Structured API Response
 ```bash
 💡 Key design principle: Use ML for fast classification, LLM for semantic understanding
 ```
-
+  
 ## 🧩 Tech Stack
 
 | Component | Technology |
@@ -65,6 +66,17 @@ Structured API Response
 | Experiment Tracking | MLflow |
 | Data Versioning | DVC |
 | Deployment | Docker |
+
+## 📈 Monitoring & Logging
+
+- Prometheus metrics track:
+  - prediction distribution
+  - inference latency
+  - intent classification frequency
+- Audit logs store:
+  - predictions and confidence
+  - intent outputs
+  - model version and latency
 
 ## 📁 Project Structure
 
@@ -206,9 +218,9 @@ This project demonstrates how machine learning can be moved beyond notebooks int
 
 ## 💡 Future Improvements
 
-- Add confidence calibration.
-- Improve prompt design for intent classification.
-- Add RAG using scam knowledge sources.
-- Deploy the system to a cloud platform.
-- Add model monitoring and drift detection.
+- Improve performance on subtle intent categories (e.g., impersonation)
+- Expand labeled dataset for intent classification
+- Explore fine-tuning LLMs instead of prompting
+- Deploy system to cloud for real-time scalability
+
 
