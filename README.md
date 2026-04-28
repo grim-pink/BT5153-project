@@ -1,6 +1,7 @@
 # 🚀 Spam + Social Intent Detection System (Group 15)
 
 A production-inspired, end-to-end machine learning pipeline for SMS analysis, combining deep learning classification with LLM-powered intent understanding.
+Data and model artifacts are versioned using DVC and are not stored directly in the repository.
 
 # 🔥 What This Project Does
 
@@ -196,6 +197,13 @@ If using Ollama inside Docker, make sure the container can reach the Ollama host
   "model_version": "distilbert_v1"
 }
 ```
+## 🔁 Reproducibility
+
+To reproduce the pipeline:
+
+```bash
+dvc pull
+dvc repro
 
 ## 📊 Key Design Decisions
 
