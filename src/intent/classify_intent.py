@@ -9,7 +9,8 @@ from src.intent.prompts import FEW_SHOT_EXAMPLES, LABELS, SYSTEM_PROMPT
 _OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 _OLLAMA_TEMPERATURE = float(os.getenv("OLLAMA_TEMPERATURE", "0.0"))
 _OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
-
+#http://host.docker.internal:11434
+#http://localhost:11434 - for training
 _LLM = None
 
 
@@ -47,12 +48,6 @@ def _normalize_label(response_text: str) -> str:
 
     return "Benign"
 
-
-# def classify_intent(text: str) -> str:
-#     llm = get_llm()
-#     messages = _build_messages(text)
-#     response = llm.invoke(messages).content
-#     return _normalize_label(response)
 
 def classify_intent(text: str, mode: str = "few") -> str:
     llm = get_llm()
