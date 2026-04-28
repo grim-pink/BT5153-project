@@ -1,0 +1,16 @@
+# Python/cache files
+__pycache__/
+*.pyc
+.venv/
+
+# Git and DVC internals
+.git/
+.dvc/cache/
+
+# Local logs and temporary files
+logs/
+mlruns/
+mlflow.db
+mlruns_colab.zip
+.DS_Store
+
