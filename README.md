@@ -126,7 +126,7 @@ validation_intent.xlsx
 ### 3. Build processed dataset
 
 ```bash
-python -m src.data.make_dataset \
+PYTHONPATH=. python -m src.data.make_dataset \
   --spam_csv data/raw/spam.csv \
   --dataset_csv data/raw/dataset.csv \
   --output_path data/processed/cleaned_spam.csv
@@ -135,7 +135,7 @@ python -m src.data.make_dataset \
 ### 4. Split train/test data
 
 ```bash
-python -m src.data.split_dataset \
+PYTHONPATH=. python -m src.data.split_dataset \
   --input_path data/processed/cleaned_spam.csv \
   --train_output data/processed/train.csv \
   --test_output data/processed/test.csv
@@ -144,7 +144,7 @@ python -m src.data.split_dataset \
 ### 5. Train DistilBERT spam classifier
 
 ```bash
-python -m src.training.train_distilbert \
+PYTHONPATH=. python -m src.training.train_distilbert \
   --train_path data/processed/train.csv \
   --test_path data/processed/test.csv \
   --model_output_dir artifacts/distilbert_spam_model \
@@ -171,6 +171,13 @@ The intent classification module assumes Ollama is running locally or externally
 ollama serve
 ollama pull qwen2.5:7b
 ```
+### To evaluate intent classification
+
+```bash
+PYTHONPATH=. python src/intent/evaluate_intent.py \
+  --input_path data/raw/validation_intent.xlsx \
+  --output_dir artifacts/metrics
+```
 
 You can change the LLM model using:
 
@@ -181,11 +188,12 @@ OLLAMA_MODEL=qwen2.5:7b
 ## 🐳 Docker
 
 ```bash
-docker build -t bt5153-spam-intent .
-docker run -p 8000:8000 bt5153-spam-intent
+docker build -t spam-intent-api .
+docker run -p 8000:8000 \
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+  -e OLLAMA_MODEL=qwen2.5:7b \
+  spam-intent-api
 ```
-
-If using Ollama inside Docker, make sure the container can reach the Ollama host.
 
 ## 🧪 Example API Output
 
@@ -214,13 +222,6 @@ dvc repro
 - The LLM is only called for spam messages to reduce cost and latency.
 - Training and inference code are separated for cleaner deployment.
 - The FastAPI layer makes the model accessible through both API and web UI.
-
-## ⚠️ Notes
-
-- Label encoding: `ham = 0`, `spam = 1`
-- Task 2 is only triggered when Task 1 predicts spam.
-- The API requires trained model artifacts inside `artifacts/distilbert_spam_model/`.
-- If the model folder is empty, FastAPI startup will fail.
 
 ## 🎯 Why This Project Matters
 
