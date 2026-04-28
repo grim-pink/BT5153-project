@@ -67,6 +67,8 @@ Structured API Response
 | Experiment Tracking | MLflow |
 | Data Versioning | DVC |
 | Deployment | Docker |
+| Monitoring | Prometheus |
+| Logging | Audit logs (inference tracking) |
 
 ## 📈 Monitoring & Logging
 
