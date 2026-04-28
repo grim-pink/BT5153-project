@@ -204,7 +204,7 @@ To reproduce the pipeline:
 ```bash
 dvc pull
 dvc repro
-
+```
 ## 📊 Key Design Decisions
 
 - Two-stage design keeps the system efficient and interpretable.
