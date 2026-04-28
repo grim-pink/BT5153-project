@@ -1,0 +1,109 @@
+schema: '2.0'
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py --spam_csv data/raw/spam.csv 
+      --dataset_csv data/raw/dataset.csv --output_path 
+      data/processed/cleaned_spam.csv
+    deps:
+    - path: data/raw/dataset.csv
+      hash: md5
+      md5: e71d50c4978c4303d2d950ad72ca3f7c
+      size: 6758439
+    - path: data/raw/spam.csv
+      hash: md5
+      md5: 008dcf9ca6aab621d3b3831db6815867
+      size: 503663
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: 70a2e29a2d66720155728700d583e19b
+      size: 1943
+    - path: src/preprocessing/clean_text.py
+      hash: md5
+      md5: e2efd88cf04b2c6e2f39076c83155774
+      size: 542
+    outs:
+    - path: data/processed/cleaned_spam.csv
+      hash: md5
+      md5: e4753ddf13a5c928fdb83cbf51a939c2
+      size: 14427598
+  split_dataset:
+    cmd: python src/data/split_dataset.py --input_path 
+      data/processed/cleaned_spam.csv --train_output data/processed/train.csv 
+      --test_output data/processed/test.csv --test_size 0.2 --random_state 42
+    deps:
+    - path: data/processed/cleaned_spam.csv
+      hash: md5
+      md5: e4753ddf13a5c928fdb83cbf51a939c2
+      size: 14427598
+    - path: src/data/split_dataset.py
+      hash: md5
+      md5: 449e7e3b117b1e933a2938c08a0c8773
+      size: 2982
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 3f56f64e1bdbe3693bc3471ed13efde0
+      size: 2892416
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 7f7bf46bb144b5c4a6e15931113a3c61
+      size: 11585350
+  train_baseline:
+    cmd: python src/training/train_baseline.py --train_path 
+      data/processed/train.csv --test_path data/processed/test.csv 
+      --model_output artifacts/baseline/model.joblib --metrics_output 
+      artifacts/metrics/baseline_metrics.json --experiment_name 
+      Spam_Classification_Baseline
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 3f56f64e1bdbe3693bc3471ed13efde0
+      size: 2892416
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 7f7bf46bb144b5c4a6e15931113a3c61
+      size: 11585350
+    - path: src/training/train_baseline.py
+      hash: md5
+      md5: e5866782c30bbce3971b0834df0d017e
+      size: 3559
+    outs:
+    - path: artifacts/baseline/model.joblib
+      hash: md5
+      md5: 53dbbb2bbbeae374ef8fd5b302dd91ea
+      size: 221652
+    - path: artifacts/metrics/baseline_metrics.json
+      hash: md5
+      md5: f7f6d051af1181c9055df39aaf6e5fa5
+      size: 196
+  train_distilbert:
+    cmd: python src/training/train_distilbert.py --train_path 
+      data/processed/train.csv --test_path data/processed/test.csv 
+      --model_output_dir artifacts/distilbert_spam_model --metrics_output 
+      artifacts/metrics/distilbert_metrics.json --experiment_name 
+      Spam_Classification_DistilBERT --model_name distilbert-base-uncased 
+      --max_length 64 --learning_rate 2e-5 --train_batch_size 32 
+      --eval_batch_size 32 --num_train_epochs 2 --weight_decay 0.01
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 3f56f64e1bdbe3693bc3471ed13efde0
+      size: 2892416
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 7f7bf46bb144b5c4a6e15931113a3c61
+      size: 11585350
+    - path: src/training/train_distilbert.py
+      hash: md5
+      md5: e079ae73207f0eacf5b8b5c941d018da
+      size: 7114
+    outs:
+    - path: artifacts/distilbert_spam_model
+      hash: md5
+      md5: 191b9babc7918de43be5566257dad254.dir
+      size: 1072850747
+      nfiles: 15
+    - path: artifacts/metrics/distilbert_metrics.json
+      hash: md5
+      md5: 1bc2bb0e3282c835a4230de1500c9a0c
+      size: 196
