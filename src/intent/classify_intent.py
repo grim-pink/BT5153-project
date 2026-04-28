@@ -9,10 +9,10 @@ from src.intent.prompts import FEW_SHOT_EXAMPLES, LABELS, SYSTEM_PROMPT
 _OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 _OLLAMA_TEMPERATURE = float(os.getenv("OLLAMA_TEMPERATURE", "0.0"))
 _OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
-#http://host.docker.internal:11434
-#http://localhost:11434 - for training
-_LLM = None
 
+#http://localhost:11434 - for training
+
+_LLM = None
 
 def get_llm():
     global _LLM

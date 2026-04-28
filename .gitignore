@@ -15,7 +15,8 @@ mlflow.db
 mlruns_colab.zip
 
 # Training artifacts and model files
-artifacts/
+artifacts/baseline
+artifacts/distilbert_spam_model
 distilbert_results/
 checkpoints/
 
