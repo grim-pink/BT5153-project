@@ -192,6 +192,7 @@ docker build -t spam-intent-api .
 docker run -p 8000:8000 \
   -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
   -e OLLAMA_MODEL=qwen2.5:7b \
+  -v "$(pwd)/logs:/app/logs" \
   spam-intent-api
 ```
 
